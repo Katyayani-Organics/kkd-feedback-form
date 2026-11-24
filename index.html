@@ -1,0 +1,44 @@
+<!doctype html><html lang="hi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>फ़ीडबैक · Katyayani Organics</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(135deg,#ecfdf5,#f0fdfa);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;color:#1f2937}
+  .card{width:100%;max-width:480px;background:#fff;border:1px solid #d1fae5;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:24px}
+  h1{font-size:20px;margin:0 0 6px} p.sub{margin:0 0 18px;color:#6b7280;font-size:14px}
+  label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+  .opt{color:#9ca3af;font-weight:400}
+  select,textarea{width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;font-family:inherit;background:#fff}
+  textarea{min-height:120px;resize:vertical}
+  button{width:100%;margin-top:20px;padding:13px;border:0;border-radius:10px;background:#059669;color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+  button:disabled{opacity:.6} .err{color:#dc2626;font-size:14px;margin-top:10px;display:none}
+  .center{text-align:center;padding:14px 0} .big{font-size:46px}
+</style></head><body><div class="card" id="root">
+  <h1>🙏 अपना फ़ीडबैक दें</h1>
+  <p class="sub">आपकी राय हमारे लिए ज़रूरी है। कृपया नीचे बताएं।</p>
+  <label>किस बारे में है? <span class="opt">(वैकल्पिक)</span></label>
+  <select id="cat"><option value="">एक विकल्प चुनें</option><option>ऑर्डर / डिलीवरी</option><option>प्रोडक्ट / गुणवत्ता</option><option>पेमेंट / रिफंड</option><option>सपोर्ट / एजेंट</option><option>अन्य (Other)</option></select>
+  <label>आपका फ़ीडबैक <span class="opt">(वैकल्पिक)</span></label>
+  <textarea id="cmt" placeholder="यहाँ लिखें… (ज़रूरी नहीं)"></textarea>
+  <div class="err" id="err"></div>
+  <button id="btn" onclick="submitFb()">फ़ीडबैक भेजें</button>
+</div>
+<script>
+  var SUPA="https://gusenrddxwuwrclzfkur.supabase.co", ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1c2VucmRkeHd1d3JjbHpma3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1OTEwMDUsImV4cCI6MjA4NTE2NzAwNX0.wUW5lK3u9OtQTRoCqng_oWkRFk7eo-Cok1XxEZ3TZzQ";
+  var chatId=new URLSearchParams(location.search).get("chat")||"";
+  function show(h){document.getElementById("root").innerHTML=h;}
+  async function submitFb(){
+    var err=document.getElementById("err"), btn=document.getElementById("btn");
+    var category=document.getElementById("cat").value, comment=document.getElementById("cmt").value.trim();
+    err.style.display="none";
+    if(!comment && !category){err.textContent="कृपया कोई विकल्प चुनें या कुछ लिखें।";err.style.display="block";return;}
+    if(!chatId){err.textContent="लिंक सही नहीं है।";err.style.display="block";return;}
+    btn.disabled=true;btn.textContent="भेजा जा रहा है…";
+    try{
+      var r=await fetch(SUPA+"/functions/v1/chat-feedback/"+chatId,{method:"POST",headers:{"Content-Type":"application/json","apikey":ANON,"Authorization":"Bearer "+ANON},body:JSON.stringify({category:category,comment:comment})});
+      var d=await r.json();
+      if(r.ok&&(d.ok||d.submitted)){show('<div class="center"><div class="big">✅</div><h1>धन्यवाद!</h1><p class="sub">आपका फ़ीडबैक मिल गया है। 🙏</p></div>');}
+      else{err.textContent=(d&&d.error)||"कुछ गड़बड़ हुई।";err.style.display="block";btn.disabled=false;btn.textContent="फ़ीडबैक भेजें";}
+    }catch(e){err.textContent="नहीं भेजा जा सका, कृपया फिर कोशिश करें।";err.style.display="block";btn.disabled=false;btn.textContent="फ़ीडबैक भेजें";}
+  }
+</script></body></html>
